@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<div id="main-todo" class="max-w-md w-full bg-white shadow-md rounded-md p-4 ">
+    <h1 class="text-lg font-semibold">Todo List</h1>
+    <ul>
+
+    </ul>
+
+    <!-- USING FORM  -->
+    <form class="mb-4" 
+          hx-post="/addtask" 
+          hx-target="#taketask" 
+          hx-swap="afterend"
+    >
+        <input type="text" 
+               id="addtask" 
+               name="addtask" 
+               autocomplete="off" 
+               placeholder="Add new task..."
+               class="mb-2 px-2 py-1 border rounded-md outline-none w-full border border-black"
+        >
+        <input type="submit" 
+               value="add task"
+               class="px-4 py-1 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none w-full"
+        >
+    </form>
+
+    <!-- hx-trigger="input changed delay:1s, search"  -->
+    <div class="flex justify-between items-center mb-4">
+        <!-- <form hx-post ="/search"
+              hx-target="#taketask"
+              hx-swap="innerHTML"
+        >  -->
+            <input type="text" 
+                id="search" 
+                hx-post ="/search"
+                hx-target="#taketask"
+                hx-swap="innerHTML"
+                hx-trigger="input delay:1s"
+                autocomplete="off"
+                name="search" 
+                placeholder="Search..." 
+                class="px-2 py-1 border rounded-md outline-none border border-black"
+            >
+            <!-- <input type="submit" value="Search"> -->
+        <!-- </form> -->
+    </div>
+
+    <!-- Todo List -->
+   
+    <ul class="flex flex-col" 
+        id="taketask"
+    >
+        {{ range .}}
+            {{ template "todocompo.html" . }}
+        {{ end }}
+    </ul>
+</div>
+
+
+
+
+
+<!-- UDING DIV  -->
+<!-- hx-swap="beforeend" -->
+<!-- <div class="mb-4" id="addtask-div">
+        <input type="text" 
+               id="addtask" 
+               name="addtask"
+               autocomplete="off" 
+               placeholder="Add new task..."
+               class="mb-2 px-2 py-1 border rounded-md outline-none w-full border border-black"
+        >
+        <input type="submit" 
+               value="add task"
+               hx-post="/addtask" 
+               hx-target="#taketask span" 
+               hx-swap="outerHTML"
+               hx-include="#addtask-div"
+               hx-trigger="click"
+               class="px-4 py-1 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none w-full"
+        >
+    </div> -->
