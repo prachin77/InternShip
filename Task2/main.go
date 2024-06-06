@@ -20,6 +20,7 @@ func main() {
 	r.HandleFunc("/postregister",handlers.Register).Methods("POST")
 	r.HandleFunc("/getlogin",handlers.GetLogin).Methods("GET")
 	r.HandleFunc("/postlogin",handlers.Login).Methods("POST")
+	r.HandleFunc("/verifyotp",handlers.VerifyOtp).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

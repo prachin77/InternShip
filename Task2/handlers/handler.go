@@ -6,7 +6,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/smtp"
 	"time"
+
+	"github.com/pquerna/otp/totp"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,9 +19,7 @@ import (
 )
 
 var id primitive.ObjectID
-
-const siteKey = "6LfUuu8pAAAAAJI1QWXqM5HKuecu1uDuM33DsD2G"
-const secretKey = "6LfUuu8pAAAAAMuy7TJqyvxhPOyPb1HWvUYhWn1x"
+var generatedOtpcode string
 
 type Info struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id"`
@@ -27,14 +28,14 @@ type Info struct {
 	Password string             `json:"password"`
 }
 
-type GoogleCaptchaResponse struct {
-	Success     bool      `json:"success"`
-	Score       float64   `json:"score"`
-	Action      string    `json:"action"`
-	ChallengeTS time.Time `json:"challenge_ts"`
-	Hostname    string    `json:"hostname"`
-	ErrorCodes  []string  `json:"error-codes"`
-}
+// type GoogleCaptchaResponse struct {
+// 	Success     bool      `json:"success"`
+// 	Score       float64   `json:"score"`
+// 	Action      string    `json:"action"`
+// 	ChallengeTS time.Time `json:"challenge_ts"`
+// 	Hostname    string    `json:"hostname"`
+// 	ErrorCodes  []string  `json:"error-codes"`
+// }
 
 const (
 	connectionString = "mongodb://localhost:27017"
@@ -128,7 +129,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		hashedPassword, err := HashPassword(info.Password)
 		if err != nil {
 			log.Fatal(err)
-			// Handle error
 			return
 		}
 
@@ -153,7 +153,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
-	// fmt.Println("get register method type : ",r.Method)
 	tmpl := template.Must(template.ParseFiles("./templates/login.html"))
 	tmpl.Execute(w, nil)
 }
@@ -163,6 +162,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),
 	}
+
 	filter := bson.M{"email": info.Email}
 	var existingUser Info
 	err := collection.FindOne(context.TODO(), filter).Decode(&existingUser)
@@ -173,14 +173,94 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if ComparePasswords(info.Password, existingUser.Password) && existingUser.Email == info.Email {
 		fmt.Fprintf(w, "<script>alert('login successfull');</script>")
 		fmt.Println("User authenticated!")
-		fmt.Println("email : ",existingUser.Email)
-		fmt.Println("original password : ",info.Password)
-		fmt.Println("hashed password : ",existingUser.Password)
-		} else {
-			fmt.Fprintf(w, "<script>alert('login not successfull');</script>")
-			fmt.Println("Incorrect email or password")
-			tmpl := template.Must(template.ParseFiles("./templates/login.html"))
-			tmpl.Execute(w, nil)
+		fmt.Println("otp verified!")
+		fmt.Println("email : ", existingUser.Email)
+		fmt.Println("original password : ", info.Password)
+		fmt.Println("hashed password : ", existingUser.Password)
+
+		generatedOtpcode = GenerateOtpKey()
+		
+		// Send OTP to user's email
+		err := SendOtpWithSmtp(existingUser.Email, generatedOtpcode)
+		if err != nil {
+			log.Println("Error sending OTP:", err)
+			// Handle error appropriately
+			return
+		}
+
+		tmpl := template.Must(template.ParseFiles("./templates/otp.html"))
+		tmpl.Execute(w, nil)
+	} else {
+		fmt.Fprintf(w, "<script>alert('login not successfull');</script>")
+		fmt.Println("Incorrect email or password")
+		tmpl := template.Must(template.ParseFiles("./templates/login.html"))
+		tmpl.Execute(w, nil)
+	}
+}
+
+func GenerateOtpKey() string {
+	// Generate a TOTP key
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "ExampleCorp",
+		AccountName: "user@example.com",
+	})
+	if err != nil {
+		fmt.Println("Error generating TOTP key:", err)
+		return ""
 	}
 
+	// Get the current TOTP code
+	code, err := totp.GenerateCode(key.Secret(), time.Now())
+	if err != nil {
+		fmt.Println("Error generating TOTP code:", err)
+		return ""
+	}
+
+	fmt.Println("Current TOTP code:", code)
+	return code
 }
+
+
+
+// Function to send OTP using net/smtp
+func SendOtpWithSmtp(emailAddr, otpValue string) error {
+	from := "prachinnayak07@gmail.com"
+	password := "uonw bges rove omhz"
+	smtpHost := "smtp.gmail.com"
+
+	msg := []byte("Subject: OTP Verification\r\n" +
+		"\r\n" +
+		"Your OTP is: " + otpValue)
+
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+
+	err := smtp.SendMail(smtpHost+":587", auth, from, []string{emailAddr}, msg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func VerifyOtp(w http.ResponseWriter , r* http.Request){
+	userOtpValue := r.PostFormValue("otp")
+	fmt.Println("user otp value : ",userOtpValue)
+	fmt.Println("generate otp value : ",generatedOtpcode)
+	if userOtpValue == generatedOtpcode{
+		fmt.Println("otp verification successfull")
+		fmt.Fprintf(w, "<script>alert('otp verification successfull');</script>")
+		// return
+	}else{
+		fmt.Fprintf(w, "<script>alert('otp verification not successfull');</script>")
+		// tmpl := template.Must(template.ParseFiles("./templates.login.html"))
+		// tmpl.Execute(w,nil)
+		tmpl := template.Must(template.ParseFiles("./templates/login.html"))
+		tmpl.Execute(w, nil)
+	}
+}
+
+// func Capthca() {
+	// 1. random char generate
+	// 2. return number from register function
+	// 3. call captcha
+// }
+
