@@ -12,11 +12,17 @@
                name="password"
                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
         >
-        
-        <button type="submit" 
-                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+        <input type="submit" 
+               value="login"
+               class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
         >
-            login
+        <button
+            hx-get="/getforgotpassword"
+            hx-target="#loginpostform"
+            hx-swap="outerHTML"
+            class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+        >
+            forgot password
         </button>
     </form>
     <br>
@@ -29,3 +35,13 @@
             don't have account ? register
     </button>
 </div>
+
+<!-- "<html>
+
+	<body>" +
+		"<h2>OTP Verification</h2>" +
+		"<p>YOUR TOKEN : <strong>" + tokenString + "</strong></p>" +
+		"<button >forgot password</button>"+
+	"</body>
+
+</html>" -->
