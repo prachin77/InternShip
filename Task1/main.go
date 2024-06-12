@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/prachin77/ToDoList/handlers"
+	"github.com/prachin77/task2/Task1/handlers"
 )
 
 func main() {

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<div id="homediv" class="bg-gray-800 py-4 fixed top-0 left-0 w-full z-50 p-2">
+    <div class="container mx-auto flex justify-between items-center">
+      <!-- Logo -->
+      <div class="text-white font-bold text-xl">
+        My Website
+      </div>
+      
+      <!-- Navigation Links -->
+      <div class="flex space-x-4">
+        <!-- <a href="#" class="text-white hover:text-gray-300">Home</a>
+        <a href="#" class="text-white hover:text-gray-300">About</a>
+        <a href="#" class="text-white hover:text-gray-300">Services</a> -->
+        <!-- <a href="#" class="text-white hover:text-gray-300">Profile</a> -->
+        <button
+            hx-get="/getprofilepage"
+            class=" bg-white p-2 border rounded"
+            hx-target="#homediv"
+            hx-swap="outerHTML"
+        >
+             <!-- {{.loginUsername}} -->
+              Profile
+        </button>
+      </div>
+    </div>
+  </div>
+  

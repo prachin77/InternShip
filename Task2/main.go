@@ -26,6 +26,8 @@ func main() {
 	r.HandleFunc("/sendmail",handlers.SendMail).Methods("POST")
 	r.HandleFunc("/getresetpassword",handlers.GetResetPassword).Methods("GET")
 	r.HandleFunc("/resetpassword",handlers.ResetPassword).Methods("POST")
+	r.HandleFunc("/getprofilepage",handlers.GetProfilePage).Methods("GET")
+	r.HandleFunc("/verify2FA",handlers.Verfiy2FA).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

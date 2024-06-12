@@ -24,6 +24,9 @@ var generatedOtpcode string
 var secretKey = []byte("secret-key")
 var userResendEmail string
 var emailOfResetPassword string
+var is2FaEnabled bool
+var loginUsername string
+
 
 type Info struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id"`
@@ -148,9 +151,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			GetLogin(w, r)
 			fmt.Println("user info id : ", userinfo.InsertedID)
-			return
+			tmpl := template.Must(template.ParseFiles("./templates/home.html"))
+			tmpl.Execute(w,nil)
+			// return
 		}
 
 	}
@@ -175,20 +179,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ComparePasswords(info.Password, existingUser.Password) && existingUser.Email == info.Email {
+		is2FaEnabled = true
 		fmt.Fprintf(w, "<script>alert('login successfull');</script>")
 		fmt.Println("User authenticated!")
 		fmt.Println("otp verified!")
 		fmt.Println("email : ", existingUser.Email)
 		fmt.Println("original password : ", info.Password)
 		fmt.Println("hashed password : ", existingUser.Password)
-
+			
+		loginUsername = existingUser.Username
+		fmt.Println("login user name for 2FA : ",loginUsername)
 		generatedOtpcode = GenerateOtpKey()
 
 		// Send OTP to user's email
 		err := SendOtpWithSmtp(existingUser.Email, generatedOtpcode)
 		if err != nil {
 			log.Println("Error sending OTP:", err)
-			// Handle error appropriately
 			return
 		}
 
@@ -250,7 +256,10 @@ func VerifyOtp(w http.ResponseWriter, r *http.Request) {
 	if userOtpValue == generatedOtpcode {
 		fmt.Println("otp verification successfull")
 		fmt.Fprintf(w, "<script>alert('otp verification successfull');</script>")
-		// return
+		tmpl := template.Must(template.ParseFiles("./templates/home.html"))
+		// tmpl.Execute(w,loginUsername)
+		// tmpl.Execute(w,struct{ LoginUsername string }{loginUsername})
+		tmpl.Execute(w,nil)
 	} else {
 		fmt.Fprintf(w, "<script>alert('otp verification not successfull');</script>")
 		tmpl := template.Must(template.ParseFiles("./templates/login.html"))
@@ -444,4 +453,13 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("./templates/resetpassword.html"))
 		tmpl.Execute(w, nil)
 	}
+}
+
+func GetProfilePage(w http.ResponseWriter, r *http.Request){
+	tmpl := template.Must(template.ParseFiles("./templates/profilepage.html"))
+	tmpl.Execute(w,nil)
+}
+
+func Verfiy2FA(w http.ResponseWriter, r *http.Request){
+	
 }
