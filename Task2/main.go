@@ -22,12 +22,11 @@ func main() {
 	r.HandleFunc("/postlogin",handlers.Login).Methods("POST")
 	r.HandleFunc("/verifyotp",handlers.VerifyOtp).Methods("POST")
 	r.HandleFunc("/getforgotpassword",handlers.GetForgotPassword).Methods("GET")
-	// r.HandleFunc("/findmail",handlers.FindMail).Methods("POST")
 	r.HandleFunc("/sendmail",handlers.SendMail).Methods("POST")
 	r.HandleFunc("/getresetpassword",handlers.GetResetPassword).Methods("GET")
 	r.HandleFunc("/resetpassword",handlers.ResetPassword).Methods("POST")
 	r.HandleFunc("/getprofilepage",handlers.GetProfilePage).Methods("GET")
-	r.HandleFunc("/verify2FA",handlers.Verfiy2FA).Methods("POST")
+	r.HandleFunc("/verify2FA",handlers.Verify2FA).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

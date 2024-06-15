@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pquerna/otp/totp"
+	"github.com/skip2/go-qrcode"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,9 +26,11 @@ var generatedOtpcode string
 var secretKey = []byte("secret-key")
 var userResendEmail string
 var emailOfResetPassword string
-var is2FaEnabled bool
+var status2FAValue string
 var loginUsername string
-
+var loginUserEmail string
+var is2FAEnabled bool
+var codeValue string
 
 type Info struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id"`
@@ -34,15 +38,6 @@ type Info struct {
 	Email    string             `json:"email"`
 	Password string             `json:"password"`
 }
-
-// type GoogleCaptchaResponse struct {
-// 	Success     bool      `json:"success"`
-// 	Score       float64   `json:"score"`
-// 	Action      string    `json:"action"`
-// 	ChallengeTS time.Time `json:"challenge_ts"`
-// 	Hostname    string    `json:"hostname"`
-// 	ErrorCodes  []string  `json:"error-codes"`
-// }
 
 const (
 	connectionString = "mongodb://localhost:27017"
@@ -132,6 +127,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		// tmpl := template.Must(template.ParseFiles("./templates/register.html"))
 		// tmpl.Execute(w, nil)
 	} else {
+		status2FAValue = "disable"
 		// Hash the password
 		hashedPassword, err := HashPassword(info.Password)
 		if err != nil {
@@ -153,7 +149,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Println("user info id : ", userinfo.InsertedID)
 			tmpl := template.Must(template.ParseFiles("./templates/home.html"))
-			tmpl.Execute(w,nil)
+			tmpl.Execute(w, nil)
 			// return
 		}
 
@@ -162,7 +158,26 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./templates/login.html"))
-	tmpl.Execute(w, nil)
+	// tmpl.Execute(w, nil)
+	tmpl.Execute(w, struct {
+		Is2FAEnabled bool
+	}{
+		Is2FAEnabled: is2FAEnabled,
+	})
+}
+
+func GenerateQRCode(email string) error {
+	data := email
+	qrCode, err := qrcode.Encode(data, qrcode.Highest, 256)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file, _ := os.Create("qrcode.png")
+	defer file.Close()
+
+	file.Write(qrCode)
+
+	return nil
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -179,32 +194,63 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ComparePasswords(info.Password, existingUser.Password) && existingUser.Email == info.Email {
-		is2FaEnabled = true
 		fmt.Fprintf(w, "<script>alert('login successfull');</script>")
 		fmt.Println("User authenticated!")
 		fmt.Println("otp verified!")
 		fmt.Println("email : ", existingUser.Email)
 		fmt.Println("original password : ", info.Password)
 		fmt.Println("hashed password : ", existingUser.Password)
-			
-		loginUsername = existingUser.Username
-		fmt.Println("login user name for 2FA : ",loginUsername)
-		generatedOtpcode = GenerateOtpKey()
 
-		// Send OTP to user's email
-		err := SendOtpWithSmtp(existingUser.Email, generatedOtpcode)
+		loginUsername = existingUser.Username
+		loginUserEmail = existingUser.Email
+		fmt.Println("login user name for 2FA : ", loginUsername)
+		fmt.Println("login user email for 2FA : ", loginUserEmail)
+
+		// Query MongoDB to check if the 2FAStatus is "enable" for this user
+		var result struct {
+			TwoFAStatus string `bson:"2FAStatus"`
+		}
+		// err := collection.FindOne(context.TODO(), filter).Select(bson.M{"2FAStatus": 1}).Decode(&result)
+		// err := collection.FindOne(context.TODO(), filter).Project(bson.M{"2FAStatus": 1}).Decode(&result)
+		opts := options.FindOne().SetProjection(bson.M{"2FAStatus": 1})
+		err := collection.FindOne(context.TODO(), filter, opts).Decode(&result)
 		if err != nil {
-			log.Println("Error sending OTP:", err)
-			return
+			log.Fatal(err)
 		}
 
-		tmpl := template.Must(template.ParseFiles("./templates/otp.html"))
-		tmpl.Execute(w, nil)
+		// If 2FAStatus is "enable", generate and send QR code
+		if result.TwoFAStatus == "enable" {
+			err := GenerateQRCode(existingUser.Email)
+			if err != nil {
+				log.Println("Error generating QR code:", err)
+				return
+			}
+		} else {
+			fmt.Fprintf(w, "<script>alert('Login successful');</script>")
+			generatedOtpcode = GenerateOtpKey()
+
+			// Send OTP to user's email
+			err := SendOtpWithSmtp(existingUser.Email, generatedOtpcode)
+			if err != nil {
+				log.Println("Error sending OTP:", err)
+				return
+			}
+
+			tmpl := template.Must(template.ParseFiles("./templates/otp.html"))
+			tmpl.Execute(w, nil)
+			// Proceed with login without OTP verification
+		}
+
 	} else {
 		fmt.Fprintf(w, "<script>alert('login not successfull');</script>")
 		fmt.Println("Incorrect email or password")
 		tmpl := template.Must(template.ParseFiles("./templates/login.html"))
 		tmpl.Execute(w, nil)
+		// tmpl.Execute(w, struct {
+		// 	Is2FAEnabled bool
+		// }{
+		// 	Is2FAEnabled: is2FAEnabled,
+		// })
 	}
 }
 
@@ -259,7 +305,7 @@ func VerifyOtp(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("./templates/home.html"))
 		// tmpl.Execute(w,loginUsername)
 		// tmpl.Execute(w,struct{ LoginUsername string }{loginUsername})
-		tmpl.Execute(w,nil)
+		tmpl.Execute(w, nil)
 	} else {
 		fmt.Fprintf(w, "<script>alert('otp verification not successfull');</script>")
 		tmpl := template.Must(template.ParseFiles("./templates/login.html"))
@@ -346,7 +392,7 @@ func SendForgotMail(email string, tokenString string) {
 		// 		"xhr.send();" +
 		// 	"}" +
 		// "</script>" +
-		"<a href='http://localhost:8080/getresetpassword'><button>Reset Password</button></a>"+
+		"<a href='http://localhost:8080/getresetpassword'><button>Reset Password</button></a>" +
 		"</body></html>",
 	)
 
@@ -401,7 +447,7 @@ func SendMail(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetResetPassword(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method type : ",r.Method)
+	fmt.Println("method type : ", r.Method)
 	tmpl := template.Must(template.ParseFiles("./templates/resetpassword.html"))
 	tmpl.Execute(w, nil)
 	// http.Redirect(w, r, "/getresetpassword", http.StatusSeeOther)
@@ -455,11 +501,47 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetProfilePage(w http.ResponseWriter, r *http.Request){
+func GetProfilePage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./templates/profilepage.html"))
-	tmpl.Execute(w,nil)
+	tmpl.Execute(w, nil)
 }
 
-func Verfiy2FA(w http.ResponseWriter, r *http.Request){
-	
+func Verify2FA(w http.ResponseWriter, r *http.Request) {
+
+	// get value from query of url
+	r.ParseForm()
+	status2FA := r.Form.Get("2FAStatus")
+	fmt.Println("2FA Status : ", status2FA)
+	// Define filter to find the user by email
+	filter := bson.M{"email": loginUserEmail}
+	fmt.Println("filter for 2FA : ",filter)
+
+	if status2FA == "enable" {
+		status2FAValue = status2FA
+		is2FAEnabled = true
+		// Define update to set the 2FAStatus field based on status2FA
+		update := bson.M{"$set": bson.M{"2FAStatus": status2FA}}
+		
+		 // Update the document in MongoDB
+		 _, err := collection.UpdateOne(context.TODO(), filter, update)
+		 if err != nil {
+			 log.Fatal(err)
+			 // Handle error appropriately, e.g., return an error response
+			 return
+		 }
+
+	} else {
+		is2FAEnabled = false
+		status2FAValue = status2FA
+		update := bson.M{"$set": bson.M{"2FAStatus": status2FA}}
+		
+		 // Update the document in MongoDB
+		 _, err := collection.UpdateOne(context.TODO(), filter, update)
+		 if err != nil {
+			 log.Fatal(err)
+			 // Handle error appropriately, e.g., return an error response
+			 return
+		 }
+	}
+
 }

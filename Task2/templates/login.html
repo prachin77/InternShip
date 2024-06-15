@@ -25,6 +25,16 @@
             forgot password
         </button>
     </form>
+    <!-- {{if .is2FAEnabled}}
+        <form hx-post="/check6digitcode">
+            <input
+                placeholder="enter 6 digit code"
+                name="check2FA"
+                id="check2FA"
+            >
+            <input type="submit" value="verfiy">
+        </form>
+    {{end}} -->
     <br>
     <button   
             hx-get="/getregister"

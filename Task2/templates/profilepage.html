@@ -1,7 +1,6 @@
+<!DOCTYPE html>
+
 <div id="profilepage">
-    <h2>Enable 2 factor authentication or not</h2>
-    <input type="radio" name="enable" id="enable" hx-post="/verify2FA">
-    <label for="enable">enable</label>
-    <input type="radio" name="disable" id="disable">
-    <label for="disable">disable</label>
+    <button hx-post="/verify2FA?2FAStatus=enable">enable</button>
+    <button hx-post="/verify2FA?2FAStatus=disable">disable</button>
 </div>
