@@ -1,0 +1,41 @@
+<div id="admin-add-user-form">   
+    <form 
+        hx-post="/admin/adduser"
+        hx-target="#user-list-div"
+        hx-swap="afterend"
+        class="mx-auto max-w-md p-6 bg-white shadow-md rounded-md"
+    >
+        <input type="text"
+               id="username"
+               name="username"
+               placeholder="Username"
+               required
+               class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+        >
+        <input type="email"
+               id="email"
+               name="email"
+               placeholder="Email" 
+               required 
+               class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+        >
+        <input type="password"
+               id="password"
+               name="password"
+               placeholder="Password"
+               required
+               class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+        >
+        <input type="submit"
+               value="Add User"
+               class="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 cursor-pointer transition duration-300"
+        >
+       </form>
+       <!-- <button
+              hx-target="#add-user-form"
+              hx-swap="outerHTML"
+              hx-trigger="click"
+       >
+              close form
+       </button> -->
+</div>

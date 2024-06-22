@@ -1,0 +1,24 @@
+<div id="user{{.UserId}}"
+     class="flex flex-row justify-between items-center px-2 py-3 hover:bg-gray-100"
+>
+    <div class="text-sm text-gray-600">{{.UserId}}</div>
+    <div class="text-sm text-gray-600">{{.UserName}}</div>
+    <div class="text-sm text-gray-600">{{.Email}}</div>
+    <div class="text-sm text-gray-600">{{.NoOfBlogs}}</div>
+    +
+    <button class="text-sm text-blue-500 hover:text-blue-700"
+            hx-put="/admin/getupdateuser/{{.UserId}}"
+            hx-target="#update-user-form"
+            hx-swap="outerHTML"
+    >
+        Edit
+    </button>
+    <button hx-delete="/admin/deleteuser/{{.UserId}}"
+            hx-target="#user{{.UserId}}"
+            hx-swap="delete"
+            hx-trigger="click"
+            class="text-sm text-blue-500 hover:text-blue-700">
+    delete
+</button>
+
+</div>

@@ -1,0 +1,54 @@
+<!-- Homepage.html -->
+<!-- {{ define "homepage" }} -->
+<div id="homediv" class="flex justify-center w-screen h-screen border-2 border-red-500 p-1">
+    <!-- Navbar -->
+    <div id="navbar" class="fixed top-0 flex justify-center">
+        <nav class="bg-gray-800 p-4 w-screen">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex space-x-4">
+                    <a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                    <a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Services</a>
+                    <a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                </div>
+                <div class="flex space-x-4">
+                    {{ if .IsAdmin }}
+                        <button hx-get="/admin/getadminpanel"
+                                class="bg-blue-500 text-white hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium"
+                                hx-swap="outerHTML"
+                                hx-target="#homediv">
+                            Admin
+                        </button>
+                    {{ else }}
+                        {{ if .IsUser }}
+                            <button class="bg-blue-500 text-white hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                                {{ .UserName }}
+                            </button>
+                        {{ else }}
+                            <button hx-get="/getadminauth"
+                                    hx-swap="innerHTML"
+                                    hx-trigger="click"
+                                    hx-target="#content-section-div"
+                                    class="bg-blue-500 text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                                Admin
+                            </button>
+                            <button hx-get="/user/auth/getlogin"
+                                    hx-target="#content-section-div"
+                                    hx-swap="innerHTML"
+                                    class="bg-blue-500 text-white hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                                Login
+                            </button>
+                        {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Content Section -->
+    <div id="content-section-div"
+         class="border-2 border-blue-500 rounded-md p-4 mt-20 w-screen">
+        <!-- Content dynamically loaded based on routes -->
+    </div>
+</div>
+<!-- {{ end }} -->

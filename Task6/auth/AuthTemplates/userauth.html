@@ -1,0 +1,139 @@
+{{if .IsLogin}}
+    <div id="auth-form"
+         class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+            </h2>
+        </div>
+        <form class="mt-8 space-y-6" 
+              hx-post="/user/auth/login"
+              hx-target="#homediv"
+              hx-swap="outerHTML"
+        >
+            <!-- <input type="hidden" name="remember" value="true"> -->
+            <div class="rounded-md shadow-sm -space-y-px">
+            <div>
+                <input id="email-address" 
+                    name="email" 
+                    type="email" 
+                    autocomplete="email" 
+                    placeholder="Email address"
+                    required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                >
+            </div>
+            <div>
+                <input id="password" 
+                    name="password" 
+                    type="password" 
+                    autocomplete="current-password" 
+                    required 
+                    placeholder="Password"
+                    class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                >
+            </div>
+            </div>
+    
+            <div>
+
+                <input type="submit" 
+                       value="Sign in ->"
+                       class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+            </div>
+        </form>
+
+
+        <button hx-get="/user/auth/getregister"
+                hx-target="#auth-form"
+                hx-swap="outerHTML"
+                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <!-- Heroicon name: solid/lock-closed -->
+            <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M2 8V6a6 6 0 1110.9-3.31L10 7.54l-3.9-2.85A6 6 0 012 6v2a8 8 0 1016 0V6a10 10 0 00-5.85-9.13A8.014 8.014 0 0010 4a8.014 8.014 0 00-5.15-1.88A10 10 0 000 6v2h2zm2 0h12V6a4 4 0 10-8 0v2z" clip-rule="evenodd" />
+            </svg>
+            </span>
+            don't have account ? Sign up
+        </button>
+
+
+        </div>
+    </div>
+  
+{{end}}
+    <div id="auth-form"
+         class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Sign up to your account
+                </h2>
+            </div>
+            <form class="mt-8 space-y-6" 
+                  hx-post="/user/auth/register"
+                  hx-target="#homediv"
+                  hx-swap="outerHTML"
+            >
+                <!-- <input type="hidden" name="remember" value="true"> -->
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <input id="username" 
+                            name="username" 
+                            type="text" 
+                            autocomplete="off" 
+                            placeholder="username"
+                            required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                        >
+                    </div>
+                    <div>
+                        <label for="email" class="sr-only">Email address</label>
+                        <input id="email" 
+                            name="email" 
+                            type="email" 
+                            autocomplete="email" 
+                            placeholder="email"
+                            required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                        >
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Password</label>
+                        <input id="password" 
+                            name="password" 
+                            type="password" 
+                            autocomplete="current-password" 
+                            required           
+                            placeholder="password"          
+                            class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <input type="submit" 
+                           value="Sign up ->"
+                           class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    />
+                </div>
+            </form>
+            <button type="submit" 
+                    hx-get="/user/auth/getlogin"
+                    hx-target="#auth-form"
+                    hx-swap="outerHTML"
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+                <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <!-- Heroicon name: solid/lock-closed -->
+                    <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M2 8V6a6 6 0 1110.9-3.31L10 7.54l-3.9-2.85A6 6 0 012 6v2a8 8 0 1016 0V6a10 10 0 00-5.85-9.13A8.014 8.014 0 0010 4a8.014 8.014 0 00-5.15-1.88A10 10 0 000 6v2h2zm2 0h12V6a4 4 0 10-8 0v2z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                already registered ? Sign in
+            </button>
+        </div>
+    </div>
+
