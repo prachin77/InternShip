@@ -6,3 +6,4 @@
 ### `task 4` : forgot password functionality with email notification
 ### `task 5` : 2 factor authentication ( 2FA )
 ### `task 6` : Implement an admin panel to allow administrators to manage various aspects of the application. This includes user management, viewing and managing content, and monitoring system activities.
+### `task 7` : network diagonisis tool

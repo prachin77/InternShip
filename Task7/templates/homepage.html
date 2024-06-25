@@ -1,0 +1,48 @@
+
+<div id="home-div" class="flex p-4 h-screen w-screen">
+    <!-- Vertical Navbar -->
+    <div id="vertical-navbar" class="bg-gray-200 rounded-lg p-4 mr-4">
+        <ul>
+            <li><button hx-get="/getipadd"
+                        hx-target="#main-content-div"
+                        hx-swap="innerHTML"
+                        class="block px-4 py-2 text-gray-800 hover:bg-gray-300 rounded">
+                    ip address
+                </button>
+            </li>
+            <li><button hx-get="/getpingform"
+                        hx-target="#main-content-div"
+                        hx-swap="innerHTML"
+                        class="block px-4 py-2 text-gray-800 hover:bg-gray-300 rounded">
+                    ping
+                </button>
+            </li>
+            <li><button hx-get="/getnslookupform"
+                        hx-target="#main-content-div"
+                        hx-swap="innerHTML"        
+                        class="block px-4 py-2 text-gray-800 hover:bg-gray-300 rounded">
+                    nslookup
+                </button>
+            </li>
+            <!-- <li><button hx-get="/getcountryform"
+                        hx-target="#main-content-div"
+                        hx-swap="innerHTML"        
+                        class="block px-4 py-2 text-gray-800 hover:bg-gray-300 rounded">
+                    country by ip
+                </button>
+            </li> -->
+            <li><button hx-get="/getwhoisform"
+                        hx-target="#main-content-div"
+                        hx-swap="innerHTML"        
+                        class="block px-4 py-2 text-gray-800 hover:bg-gray-300 rounded">
+                    WHOIS   
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content-div" class="flex-1">
+
+    </div>
+</div>
