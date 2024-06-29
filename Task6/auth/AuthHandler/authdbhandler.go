@@ -170,3 +170,5 @@ func CheckUserInDb(user models.User) (bool, error) {
     return count > 0, nil
 }
 
+
+
